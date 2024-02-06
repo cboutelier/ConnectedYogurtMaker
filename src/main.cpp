@@ -6,6 +6,7 @@
 // #include <ESP8266WebServer.h>
 #include <WiFiManager.h>
 #include <Adafruit_NeoPixel.h>
+#include "OneButton.h"
 
 #define NUM_LEDS 1
 #define DATA_PIN D7
@@ -13,12 +14,17 @@
 #define PIN D7
 #define NUMPIXELS 1 // Popular NeoPixel ring size
 
+#define BUTTON_PIN D3
+
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 #define DELAYVAL 500 // Time (in milliseconds) to pause between pixels
 
 bool connected = false;
+bool startPressed = false;
 StateMachine machine = StateMachine();
+
+OneButton button(BUTTON_PIN, true);
 
 void initAction()
 {
@@ -49,7 +55,11 @@ void whiteLed()
 void blueLed()
 {
   pixels.setPixelColor(0, pixels.Color(0, 0, 255));
-
+  pixels.show();
+}
+void redLed()
+{
+  pixels.setPixelColor(0, pixels.Color(255, 0, 0));
   pixels.show();
 }
 
@@ -77,9 +87,16 @@ State *waitingState = machine.addState([]()
   if(machine.executeOnce){
     Serial.println("Waiting state");
     Serial.println("Execute Once the waiting state");
+    button.attachClick( [](){  startPressed = true;});
     greenLed();
     //digitalWrite(LED,!digitalRead(LED));
   } });
+
+State *runningState = machine.addState([]()
+                                       {
+if( machine.executeOnce){
+  redLed();
+} });
 
 void test()
 {
@@ -102,6 +119,21 @@ void setup()
                                 delay( 5000);
                                 return true; },
                                 waitingState);
+  waitingState->addTransition([]()
+                              {
+    if( startPressed)
+    {
+      startPressed = false;
+      return true;
+    }
+    return false; },
+                              runningState);
+
+  runningState->addTransition([]()
+                              {
+    delay(1000);
+    return true; },
+                              waitingState);
 
   delay(1000);
 }
