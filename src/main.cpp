@@ -84,18 +84,22 @@ State *connectedState = machine.addState([]()
 
 State *waitingState = machine.addState([]()
                                        {
-  if(machine.executeOnce){
+  if(machine.executeOnce)
+  {
     Serial.println("Waiting state");
     Serial.println("Execute Once the waiting state");
     button.attachClick( [](){  startPressed = true;});
     greenLed();
     //digitalWrite(LED,!digitalRead(LED));
-  } });
+  } 
+   button.tick();
+  });
 
 State *runningState = machine.addState([]()
                                        {
 if( machine.executeOnce){
   redLed();
+  button.
 } });
 
 void test()
