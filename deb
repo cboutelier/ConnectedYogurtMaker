@@ -1,0 +1,60 @@
+--------------- CUT HERE FOR EXCEPTION DECODER ---------------
+
+Abort called
+
+>>>stack>>>
+
+ctx: cont
+sp: 3fff0030 end: 3fff0100 offset: 0010
+3fff0040:  3ffee270 3ffee8e4 3ffe85d8 40100aff  
+3fff0050:  00000000 00000435 b5c28f5c 00000018  
+3fff0060:  0000004d 3ffee8e4 000003e8 00000000  
+3fff0070:  3ffee744 3ffee750 00000020 3ffee738  
+3fff0080:  3ffee744 3fff068c 00000000 40205cf2  
+3fff0090:  00000bb8 00000000 3ffee710 3ffee750  
+3fff00a0:  3ffee734 0000004d 000003e8 3ffee750  
+3fff00b0:  3ffee734 3ffee738 3ffee744 40201414  
+3fff00c0:  3ffee708 feefeffe feefeffe feefeffe  
+3fff00d0:  feefeffe feefeffe feefeffe 3ffee90c  
+3fff00e0:  3fffdad0 00000000 3ffee8e0 40208344  
+3fff00f0:  feefeffe feefeffe 3fffdab0 40100e1d  
+<<<stack<<<
+
+--------------- CUT HERE FOR EXCEPTION DECODER ---------------
+���`␌�9�H␂B�t�)�
+User exception (panic/abort/assert)
+--------------- CUT HERE FOR EXCEPTION DECODER ---------------
+
+Abort called
+
+>>>stack>>>
+
+ctx: cont
+sp: 3fff0030 end: 3fff0100 offset: 0010
+3fff0040:  3ffee270 3ffee8e4 3ffe85d8 40100aff  
+3fff0050:  00000000 00000434 7810624d 00000018  
+3fff0060:  0000004c 3ffee8e4 000003e8 00000000  
+3fff0070:  3ffee744 3ffee750 00000020 3ffee738  
+3fff0080:  3ffee744 3fff068c 00000000 40205cf2  
+3fff0090:  00000bb8 00000000 3ffee710 3ffee750  
+3fff00a0:  3ffee734 0000004c 000003e8 3ffee750  
+3fff00b0:  3ffee734 3ffee738 3ffee744 40201414  
+3fff00c0:  3ffee708 feefeffe feefeffe feefeffe  
+3fff00d0:  feefeffe feefeffe feefeffe 3ffee90c  
+3fff00e0:  3fffdad0 00000000 3ffee8e0 40208344  
+3fff00f0:  feefeffe feefeffe 3fffdab0 40100e1d  
+<<<stack<<<
+
+--------------- CUT HERE FOR EXCEPTION DECODER ---------------
+H!�ԅ9��׋� ��JG��0z
+User exception (panic/abort/assert)
+--------------- CUT HERE FOR EXCEPTION DECODER ---------------
+
+Abort called
+
+>>>stack>>>
+
+	tzapu/WiFiManager@^0.16.0
+	fastled/FastLED@^3.6.0
+	jrullan/StateMachine@^1.0.11
+	ivanseidel/LinkedList@0.0.0-alpha+sha.dac3874d28
