@@ -12,13 +12,14 @@
 #define DATA_PIN D7
 
 #define PIN D7
-#define NUMPIXELS 1 // Popular NeoPixel ring size
+#define NUMPIXELS 1 
 
-#define BUTTON_PIN D3
+#define BUTTON_PIN D5
 
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
-#define DELAYVAL 500 // Time (in milliseconds) to pause between pixels
+unsigned long processStartTime = 0;
+
 
 bool connected = false;
 bool startPressed = false;
@@ -88,18 +89,19 @@ State *waitingState = machine.addState([]()
   {
     Serial.println("Waiting state");
     Serial.println("Execute Once the waiting state");
-    button.attachClick( [](){  startPressed = true;});
+    button.attachClick( [](){  
+      Serial.println("Clicked");
+      startPressed = true;
+    });
     greenLed();
     //digitalWrite(LED,!digitalRead(LED));
   } 
-   button.tick();
-  });
+   button.tick(); });
 
 State *runningState = machine.addState([]()
                                        {
 if( machine.executeOnce){
   redLed();
-  button.
 } });
 
 void test()
@@ -127,6 +129,7 @@ void setup()
                               {
     if( startPressed)
     {
+      processStartTime = millis();
       startPressed = false;
       return true;
     }
@@ -135,15 +138,20 @@ void setup()
 
   runningState->addTransition([]()
                               {
-    delay(1000);
-    return true; },
+    unsigned long currentTime = millis();
+    unsigned long deltaTime = currentTime-processStartTime;
+    if( deltaTime > 1000*60*2){
+      return true;
+    }
+    return false; },
                               waitingState);
 
+  pinMode(D5, INPUT_PULLUP);
   delay(1000);
 }
 
 void loop()
 {
   machine.run();
-  delay(1000);
+ 
 }
