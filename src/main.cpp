@@ -9,7 +9,7 @@
 #include "OneButton.h"
 
 #define NUM_LEDS 1
-#define DATA_PIN D7
+
 
 #define PIN D7
 #define NUMPIXELS 1 
