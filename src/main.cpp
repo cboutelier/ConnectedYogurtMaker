@@ -1,18 +1,21 @@
 #include <Arduino.h>
 #include <StateMachine.h>
 #include <ESP8266WiFi.h> //Import ESP 8266 WiFi library
+#include <WiFiManager.h>
+
+#include <PubSubClient.h>
 
 // #include <DNSServer.h>
 // #include <ESP8266WebServer.h>
-#include <WiFiManager.h>
+
 #include <Adafruit_NeoPixel.h>
 #include "OneButton.h"
+#include "mqtt_manager.h"
 
 #define NUM_LEDS 1
 
-
 #define PIN D7
-#define NUMPIXELS 1 
+#define NUMPIXELS 1
 
 #define BUTTON_PIN D5
 
@@ -20,12 +23,22 @@ Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 unsigned long processStartTime = 0;
 
-
 bool connected = false;
 bool startPressed = false;
 StateMachine machine = StateMachine();
 
 OneButton button(BUTTON_PIN, true);
+
+WiFiClient espClient;
+PubSubClient client(espClient);
+MqttManager *mqtt;
+
+bool redState = false;
+
+unsigned long lastMsg = 0;
+#define MSG_BUFFER_SIZE (50)
+char msg[MSG_BUFFER_SIZE];
+int value = 0;
 
 void initAction()
 {
@@ -35,6 +48,7 @@ void initAction()
   wifiManager.autoConnect("Yogurt maker");
   // if you get here you have connected to the WiFi
   Serial.println("connected...yeey :)");
+  mqtt = new MqttManager(&client);
   connected = true;
 }
 void checkConnected();
@@ -71,7 +85,7 @@ State *initialState = machine.addState([]()
     Serial.println("Execute Once");
     whiteLed();
     initAction();
-    //digitalWrite(LED,!digitalRead(LED));
+    
   } });
 
 State *connectedState = machine.addState([]()
@@ -102,6 +116,10 @@ State *runningState = machine.addState([]()
                                        {
 if( machine.executeOnce){
   redLed();
+  redState = true;
+  
+  mqtt->SendStatus("launched!");
+  
 } });
 
 void test()
@@ -148,10 +166,29 @@ void setup()
 
   pinMode(D5, INPUT_PULLUP);
   delay(1000);
+
 }
 
 void loop()
 {
   machine.run();
- 
+  if (redState)
+  {
+    redState = false;
+    Serial.println("end");
+  }
+
+  client.loop();
+  /*
+    unsigned long now = millis();
+    if (now - lastMsg > 2000)
+    {
+      lastMsg = now;
+      ++value;
+      snprintf(msg, MSG_BUFFER_SIZE, "hello world #%ld", value);
+      Serial.print("Publish message: ");
+      Serial.println(msg);
+      client.publish("outTopic", msg);
+    }
+    */
 }
