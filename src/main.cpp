@@ -11,17 +11,22 @@
 #include <Adafruit_NeoPixel.h>
 #include "OneButton.h"
 #include "mqtt_manager.h"
+#include "configuration_administrator.h"
 
 #define NUM_LEDS 1
 
+// Led is on D7
 #define PIN D7
 #define NUMPIXELS 1
 
 #define BUTTON_PIN D5
 
+#define RELAY_PIN D3
+
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 unsigned long processStartTime = 0;
+unsigned long finishedTime = 0;
 
 bool connected = false;
 bool startPressed = false;
@@ -32,13 +37,13 @@ OneButton button(BUTTON_PIN, true);
 WiFiClient espClient;
 PubSubClient client(espClient);
 MqttManager *mqtt;
-
-bool redState = false;
+ConfigurationAdministrator *configurationAdministrator;
 
 unsigned long lastMsg = 0;
 #define MSG_BUFFER_SIZE (50)
 char msg[MSG_BUFFER_SIZE];
 int value = 0;
+ulong processTime = 0;
 
 void initAction()
 {
@@ -50,6 +55,8 @@ void initAction()
   Serial.println("connected...yeey :)");
   mqtt = new MqttManager(&client);
   connected = true;
+  configurationAdministrator = new ConfigurationAdministrator();
+  processTime = configurationAdministrator->GetProcessTime() * 1000;
 }
 void checkConnected();
 
@@ -75,6 +82,12 @@ void blueLed()
 void redLed()
 {
   pixels.setPixelColor(0, pixels.Color(255, 0, 0));
+  pixels.show();
+}
+
+void orangeLed()
+{
+  pixels.setPixelColor(0, pixels.Color(255, 140, 0));
   pixels.show();
 }
 
@@ -116,11 +129,20 @@ State *runningState = machine.addState([]()
                                        {
 if( machine.executeOnce){
   redLed();
-  redState = true;
+   digitalWrite(RELAY_PIN, 1);
   
-  mqtt->SendStatus("launched!");
+  mqtt->SendStatus("launched ooo!");
   
 } });
+
+State *finishedState = machine.addState([]()
+                                        {
+if( machine.executeOnce){
+  orangeLed();
+  digitalWrite(RELAY_PIN, 0);
+  mqtt->SendStatus("finished!");
+} 
+button.tick(); });
 
 void test()
 {
@@ -131,7 +153,7 @@ void setup()
 
   Serial.begin(9600);
   pixels.begin();
-  pixels.setBrightness(50);
+  pixels.setBrightness(20);
 
   // Adding transitions
   initialState->addTransition([]()
@@ -158,37 +180,35 @@ void setup()
                               {
     unsigned long currentTime = millis();
     unsigned long deltaTime = currentTime-processStartTime;
-    if( deltaTime > 1000*60*2){
+    if( deltaTime > processTime){
       return true;
     }
     return false; },
-                              waitingState);
+                              finishedState);
 
+  finishedState->addTransition([]()
+                               {
+    if( startPressed)
+    {
+      startPressed = false;
+      Serial.println("Going to waiting state");
+      return true;
+    }
+        return false; },
+                               waitingState);
+
+  // Hardware configuration of the button
   pinMode(D5, INPUT_PULLUP);
-  delay(1000);
+  // Hardware configuration of the relay
+  pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, 0);
 
+  delay(1000);
 }
 
 void loop()
 {
   machine.run();
-  if (redState)
-  {
-    redState = false;
-    Serial.println("end");
-  }
 
   client.loop();
-  /*
-    unsigned long now = millis();
-    if (now - lastMsg > 2000)
-    {
-      lastMsg = now;
-      ++value;
-      snprintf(msg, MSG_BUFFER_SIZE, "hello world #%ld", value);
-      Serial.print("Publish message: ");
-      Serial.println(msg);
-      client.publish("outTopic", msg);
-    }
-    */
 }

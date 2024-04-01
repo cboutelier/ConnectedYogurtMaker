@@ -48,13 +48,20 @@ void MqttManager::SendStatus(String step)
       */
     if (!isSet)
     {
+        Serial.println("Send status, not set");
         this->FirstInit();
     }
 
     if (!this->mqttClient->connected())
     {
+        Serial.println("Not connected");
         Reconnect();
-         this->mqttClient->publish(this->channel.c_str(), step.c_str());
+         //this->mqttClient->publish(this->channel.c_str(), step.c_str());
+Serial.println("Sending a step after reconnect");
+         this->mqttClient->publish("yogurt/step", step.c_str());
+    }else{
+        Serial.println("Sending a step");
+        this->mqttClient->publish("yogurt/step", step.c_str());
     }
 }
 
@@ -92,10 +99,11 @@ void MqttManager::Reconnect()
 
 void MqttManager::FirstInit()
 {
-    this->host = "192.168.1.28";
+    //jeedom:sAhR5RQN3eQmR90rP0EEgcJfMDgYJWRO465fEXub6NWjc9XmsAEyqpvp4ZvjpZd7
+    this->host = "192.168.1.189";
     this->channel = "yogurt";
-    this->username = "cedric";
-    this->password = "test";
+    this->username = "jeedom";
+    this->password = "KvxDsutLk8siF0eUhrseLkBRYcChd6henAS4tlVQnu6Aj89EOmmdJsxLDBS4PWcX";
     prefs = new Preferences();
     prefs->begin("mqtt", false);
     prefs->putString("host", this->host);
